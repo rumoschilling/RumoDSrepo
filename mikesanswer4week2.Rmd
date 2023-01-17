@@ -1,0 +1,142 @@
+---
+title: "Data Visualization Answer Key"
+author: "Miker Keim"
+date: January 12, 2023
+format: html
+editor: visual
+---
+
+```{r load packages, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(openintro)
+```
+
+### 3.2.4 Exercises
+
+1. Running this line generates a blank plot because no layers were selected using the geom function.
+```{r Exercise 3.2.4.1}
+ggplot(data=mpg) # this should show a blank plot
+```
+
+2. There are 234 rows and 11 columns in the mpg dataset.
+```{r Exercise 3.2.4.2}
+#View(mpg) # a look at the data (note that V must be capitalized)
+# the "View" command can be run in the console, but not in an .RMD knitting/rendering, because it's trying to open up a data table viewer in RStudio
+
+nrow(mpg) # a direct look at number of rows
+ncol(mpg) # a direct look at number of columns
+glimpse(mpg) # another option
+```
+
+3. Quoting directly from the help file, the drv variable indicates "the type of drive train, where f = front-wheel drive, r = rear wheel drive, 4 = 4wd"
+```{r Exercise 3.2.4.3}
+?(mpg) # call the help file up (look in lower right pane)
+```
+
+4. Below is a scatterplot of hwy vs. cyl. Note the convention here is that hwy is therefore the dependent variable, plotted on the y-axis, and cyl is the independent variable, plotted on the x-axis.
+```{r Exercise 3.2.4.4}
+ggplot(data=mpg)+
+  geom_point(mapping = aes(x=cyl,y=hwy))
+# alternative coding that does the same thing:
+ggplot(mpg,mapping = aes(x=cyl,y=hwy))+
+  geom_point()
+# I have seen both of these used by people who know what they're doing.
+# not sure how to give guidance on one or the other.
+```
+5. Neither of the variables "drv" or "class" is an ordered variable, so they cannot be placed along an axis in a way that has inherent meaning.
+```{r Exercise 3.2.4.5}
+ggplot(data=mpg)+
+  geom_point(mapping = aes(x=drv,y=class))
+```
+
+### 3.3.1 Exercises
+1. The points aren't blue because the color assignment is inside the "aes" mapping.
+```{r Exercise 3.3.1.1}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+```
+Here's how we can fix that:
+```{r Exercise 3.3.1.1b}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy),color = "blue")
+```
+2. There are eleven variables total. The following are categorical: manufacturer, model, trans, drv, fl and class. The following are continuous: displ, cty, hwy. The following are numerical, but not continuous: year, cyl.
+
+3. The code below maps a continuous variable (in this case the city mileage in the variable cty) to color (which creates a color gradient according to its variable), size (which creates a size gradient according to its variable) and shape (which does not work, because shape is not ordered.).
+```{r Exercise 3.3.1.3}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy,color = cty))
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy,size = cty))
+## this line is commented out, because it causes an error - you cannot map a continuous variable to shape, because shapes are not ordered.
+# ggplot(data = mpg) + 
+#   geom_point(mapping = aes(x = displ, y = hwy,shape = cty))
+```
+
+4. Mapping multiple aesthetics to the same variable creates the visual effect you'd expect, but this creates redundant signals, e.g. high values are both a bigger size AND a darker color.
+```{r Exercise 3.3.1.4}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy,color = hwy,size=hwy))
+```
+
+5. Quoting directly from the help file, "For shapes that have a border (like 21), you can colour the inside and outside separately. Use the stroke aesthetic to modify the width of the border."
+```{r Exercise 3.3.1.5}
+?geom_point
+```
+
+6. Mapping an aesthetic to something other than a variable name allows you to show some varation in a variable according to a threshold.
+```{r Exercise 3.3.1.6}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy,color = displ<5))
+# I kind of like this example to show that the general patterns persist across time...
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = cty, y = hwy,size=displ,color = year<2000))
+
+```
+
+### 3.5.1 Exercises
+# to do - 6 exercises about faceting.
+1. If you facet on a continuous variable, you get an individual plot for each unique value of the variable on which you are faceting. 
+```{r Exercise 3.5.1.1}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ cty)
+```
+
+2. Empty plots refer to combinations of drive train and cylinder that do not exist in the data set, e.g. There are no 5-cylinder cars with 4-wheel drive. For the graph shown below, this corresponds to places on the grid with no dots showing.
+```{r Exercise 3.5.1.2}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = drv, y = cyl))
+```
+
+3.The code below creates graphs that are faceting by one variable (drv for the first, cyl for the second) and the use of drv~. specifies that you will arrange the plots with displ as a single x-axis variable that will be used across all three plots (i.e. stacking the 3 plots vertically) whereas using .~cyl arranges the faceting variable as a column heading, so the x-axis gets repeated for each unique value of cyl. (I believe that the first approach, )
+```{r Exercise 3.5.1.3}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+# I think the first of the two plots above is better, so I've modified the second one to match the first to test my opinion.
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(cyl ~ .)
+# hmm - not quite the slam dunk I was expecting.
+```
+
+4. Recall the earlier example where the first facet in the plot below (2seater sport cars) were shown as distinct from the other cars by using color. In that case, I think the point is made more clearly by having all the dots on one plot and showing the outlier group (sports cars) with another color. But you have to think about the point you're trying to make - in this case we're trying to show how ONE category varies from all the rest, or said another way, how one variable explains the divergence of that cluster from the larger pattern in the data.
+
+With larger data sets, too many colors for too many variables gets confusing, and faceting can help tease things apart.
+
+The real answer, I think, is that you have to make a bunch of plots and then figure out which ones are the best for demonstrating the point you're trying to make (while being intellectually honest!!!)
+
+```{r Exercise 3.5.1.4}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+5. The nrow and ncol arguments for facet_wrap allow you to set the number of rows and columns for your array of plots. The other argument that controls the layout is as.table. There are other arguments that affect the scaling of axes and location of labels, but they do not affect the actual layout of the grid/array of plots.
+
+6. Well, I think this is somewhat debatable, but AN argument for doing this is that most grids of plots will be horizontally (landscape) oriented, so, for example, reading a 2x3 or 2x4 grid is likely to "look better on the page" than a 3x2 or 4x2. But it depends... If your grid is going to take an entire page of letter or A4 paper, you may well opt for 3x2 or 4x2. But empirically, most grids do tend to be read horizontally and this is a visual default many audiences will expect (think of slide decks, plots across the top 1/3 of a page, etc.)

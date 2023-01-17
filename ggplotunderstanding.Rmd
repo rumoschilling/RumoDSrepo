@@ -1,0 +1,157 @@
+---
+title: "ggplotunderstanding"
+author: "Rumo Schilling"
+date: "9 Jan 2022"
+output: github_document
+---
+
+## Load packages and data
+
+```{r load-packages, message = FALSE}
+library(tidyverse)
+library(openintro)
+library(dplyr)
+```
+
+## Exercises
+### Exercise 1
+```{r,echo=FALSE}
+print(paste("There are",nrow(seattlepets),"pets in the dataset"))
+```
+
+### Exercise 2
+
+```{r,echo=FALSE}
+print(paste("There are",ncol(seattlepets),"variables per pet in the dataset")) 
+```
+
+### Exercise 3
+
+```{r,echo=FALSE}
+print(seattlepets %>% count(animal_name,sort =TRUE))
+seattlepets %>%
+  count(animal_name, sort = TRUE) %>%slice(2:4) 
+```
+Lucy Charlie Luna
+
+### Exercise 4
+```{r exercise 4}
+seattlepets %>% group_by(species) %>% count(animal_name,sort= TRUE) %>%
+slice_max(n,n=5) %>% arrange(species,n)
+
+
+```
+This is kind of weird, becaues it sorts them in descending order
+```{r exercise 4.1}
+seattlepets %>% group_by(species) %>% count(animal_name,sort= TRUE) %>%
+slice_max(n,n=5) 
+
+```
+It seems like removing the arrange argument circumvents that problem
+If you first sort by n, it only shows gat names
+It seems also to go alphabetically on the group_by(I tested it with primary breed sort)
+### Exercise 5
+
+Everything above the line means that dogs names are more common
+
+### Exercise 6
+They are positvly associated. It meanst thatt if a name si more common for a dog, it is also more common for a cat.
+
+### Car excersise
+```{r,echo = FALSE}
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy),color = "blue")
+```
+#### HW 4 Tuesday
+
+Answer 1. It does not close brackets. Everything in the aes puts the data to some dimension, in this case, the variable blue. If it is outside the aes, like in my code above, it works.
+
+Answer 2: 
+model,class,manufacturer,drv,fl,trans and class are categorial
+
+cty,displ and hwy are continuous.
+```{r,echo = FALSE}
+#continuous
+#shape throws an error(ofc becuz not enough shpaes)
+#color
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,color=cty)) 
+#size
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,size= cty))             
+#categorical
+#shape
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,shape=model))
+#color
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,color=model)) 
+#size
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,size=model)) 
+                                                 
+```
+mapping shape to continous throws an error
+when mapping continuous to...
+...the color it is gradually lightening the higher the continuous variable
+the size it gets bigger the higher the value of the data point
+On categorical variables, those aesthetics are only used to distinguish
+
+```{r,echo = FALSE}
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,color=model,shape=model))
+```
+The double mapping looks pretty cool(although here are only 6 shapes)
+```{r,echo = FALSE}
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,stroke=cty))
+```
+I dont understand stroke.
+```{r,echo=FALSE}
+ggplot(data=mpg) + geom_point(mapping = aes(x=cyl ,y=hwy,color=year>2000))
+```
+It makes an if statement, and not a plot
+3.5 
+```{r}
+ ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+
+## What happens when you faced a continous variable?
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = cyl,y = hwy)) +facet_wrap(~ displ)
+```
+It makes a lot of plots(altho this is technically discrete)
+
+## What do the empty cells in plot with facet_grid(drv ~ cyl) mean? How do they relate to this plot?
+
+They mean that there is no car with drv = r and 5 cylinders
+## 3.
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+```
+The code makes different plots for differents cyl /drv. It is like facet wrap, but longer
+ 
+## 4. What are the advantages of facet wrapping over coloring?
+You can easily zoom on one graph, while you can see the differences better in color coded ones. In larger datasets, I would try both once, and see if one of them has better information.
+## 5. What does facet wrap nrow and ncol do
+They determine the number of rows or columns of the plots. facet_grid does not have that, because rows and columns are equal to the variable they represent.
+
+## When using facet_grid() you should usually put the variable with more unique levels in the columns. Why?
+Because you can scroll, and thus it is better to look at
+
+```{r}  
+ggplot(data = mpg,mapping = aes(x = hwy,y = cyl))+geom_smooth(color = "blue")+geom_point(mapping = aes(color = class))
+```
+geom_histogram is a histogram,
+geom_line, a line chart
+geom_boxplot is a boxplot
+I think that the code will give a normal plot like in the examples shown above, but the will be colorcoded after drv,and will have the same curve as the examples in 3.6
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
