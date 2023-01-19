@@ -229,3 +229,100 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
     ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
 ![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+Oh I forgot that it is a global variable, which means it makes sense
+that the lines are 3 different ones.
+
+``` r
+ggplot(data = mpg) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, color = drv),
+    show.legend = FALSE
+  )
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+3. Show legend disables the legend, and they used in the code because it
+would be too small with that many plots.
+
+4.  The se argument enables/disables the CI around the line, and with
+    level we can adjust the level of confidence (95 % by default)
+
+5.  The plots seem to be the same
+
+``` r
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
+Hooray I was right
+
+6.  
+
+``` r
+ggplot(data = mpg, mapping = aes(x=displ,y = hwy))+
+geom_point(stroke = 2) +
+geom_smooth(se = FALSE)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+ggplot(data = mpg,mapping = aes(x = displ,y = hwy))+
+geom_point(stroke = 3) +
+geom_smooth(mapping = aes(group=drv),se = FALSE)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+
+``` r
+ggplot(data = mpg,mapping = aes(x = displ,y = hwy,color = drv))+
+geom_point(stroke = 3) +
+geom_smooth(mapping = aes(group=drv),se = FALSE)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-16-3.png)<!-- -->
+
+``` r
+ggplot(data = mpg,mapping = aes(x = displ,y = hwy))+
+geom_point(mapping = aes(color = drv), stroke = 3) +
+geom_smooth(se = FALSE,stroke = 2)
+```
+
+    ## Warning in geom_smooth(se = FALSE, stroke = 2): Ignoring unknown parameters:
+    ## `stroke`
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-16-4.png)<!-- -->
+
+``` r
+ggplot(data = mpg,mapping = aes(x = displ,y = hwy))+
+geom_point(mapping = aes(color = drv),pch = 20) +
+geom_smooth(mapping = aes(linetype=drv),se = FALSE)
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+![](ggplotunderstanding_files/figure-gfm/unnamed-chunk-16-5.png)<!-- -->
