@@ -1,0 +1,68 @@
+---
+title: "rbnb"
+author: "Rumo Schilling"
+date: "2023-01-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dsbox)
+library(ggridges)
+library(DescTools)
+```
+```{r}
+arrange(edibnb,price)
+edibnb %>% arrange(price) %>%
+select(price)
+```
+There are `r nrow(edibnb) ` rows. Each row represents one building that is up for renting
+The minimal price is 10 Dollar the highest 999 Dollar
+```{r}
+ggplot(data = edibnb) + geom_histogram(aes(x = price),binwidth = 10)+
+facet_wrap(~neighbourhood)
+ggplot(data = edibnb,mapping=aes(x=price)) + geom_histogram(binwidth = 100)+
+facet_wrap(~neighbourhood)
+ggplot(data = edibnb,mapping=aes(x=price)) + geom_histogram(binwidth = 50)+
+facet_wrap(~neighbourhood)
+```
+### Group it
+```{r}
+top5 <- edibnb %>% 
+  drop_na(price) %>% 
+  group_by(neighbourhood) %>% 
+  summarize(medprice = median(price)) %>% 
+  arrange(desc(medprice)) %>%
+  slice_head(n=5)
+
+filtered <- edibnb %>% drop_na(price) %>%filter(is.element(neighbourhood,top5$neighbourhood))
+ggplot(data = filtered,mapping = aes(x = price,y = neighbourhood))+
+geom_density_ridges()
+  
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))] # this is the elegant way to do it: match makes it so that the list is transformed into the first index of the value i,e match x= c(1,2,1,5) = (1,2,1,4). Then tabulate will just tabulate over the length of the list, and not over all the prices. A dirty, more readable way would be which.max(tabulate(x))
+}
+
+filtered %>% group_by(neighbourhood) %>% summarise(minprice = min(price),maxprice = max(price),meanprice = mean(price),stdprice =sd(price),mode = Mode(price),iqrprice = IQR(price))
+
+```
+Trying to use the count function to achieve the same mode result(I spent forever calculating above)
+```{r}
+filtered %>% 
+group_by(neighbourhood) %>%
+count(price,sort = TRUE) %>%
+arrange(desc(n))
+```
+
+As we see, Bruntsfield is the cheapest neighborhood on average and in an interquartile range
+```{r}
+ggplot(data = edibnb,mapping = aes(x = review_scores_rating,y = neighbourhood))+
+  geom_density_ridges()
+```
+
+
+
+
+
