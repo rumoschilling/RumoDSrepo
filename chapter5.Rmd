@@ -1,0 +1,94 @@
+---
+title: "chapter5"
+author: "Rumo Schilling"
+date: "2023-02-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+
+```
+
+```{r}
+#| filter practice
+#arrival delay 2 or more hrs
+flights %>%
+  filter(arr_delay >=2)
+"arrives in Houston"
+flights %>%
+  filter(dest == "HOU" | dest =="IAH")
+"from Delta,United or American"
+flights %>%
+  filter(carrier == "AA" |carrier == "UA" | carrier == "DL")
+"Flew in the Summer"
+flights %>%
+  filter(month == "Juni" | month == "July" | month == "August")
+"Arrived 2+ hrs late but did not depart late"
+flights %>% 
+  filter(arr_delay >=2 & dep_delay <= 0)
+"Arrived 1+ hrs late, but made up at least half an hour"
+flights %>%
+  mutate(madeup = arr_delay - dep_delay) %>%
+  filter(arr_delay >= 1 & madeup >= 0.5)
+#
+flights %>%
+  filter(between(dep_time,0,6))
+
+flights %>% 
+  filter(is.na(dep_time))
+# jeeze, that is a lot of NA. I suspect it will be that the cancelled flights
+flights %>%
+  filter(is.na(dep_time)) %>%
+  select(dep_time,dep_delay,sched_arr_time,arr_delay,arr_time)
+# Ig I am right.
+```
+> NA | True
+Error: object 'True' not found
+> NA | TRUE
+[1] TRUE
+> TRUE | FALSE
+[1] TRUE
+> FALSE | NA
+[1] NA
+> FALSE | FALSE
+[1] FALSE
+> NA | TRUE
+[1] TRUE
+Connected to your session in progress, last started 2023-Feb-06 16:00:31 UTC (23 minutes ago)
+> NA & FALSE
+[1] FALSE
+> FALSE & TRUE
+[1] FALSE
+> NA & TRUE
+[1] NA
+ 
+ It appears to be that When asking for or, True is the thing we are looking for, and asking for and, then False is the desired result. When NA is there, the computer is confident if the desired result is already there(when something is true and false it is false, so it does not matter if NA is there, but if something is TRUE and NA, the output is NA). It is like transistor operators.
+ 
+```{r}
+#| label: 5.3.1
+#| message: false
+
+# 1.
+flights %>% 
+ arrange(desc(is.na(dep_time)),desc(dep_time))
+#2.
+flights %>% 
+  arrange(desc(arr_delay)) %>%
+  select(arr_delay)
+flights %>% 
+  arrange(arr_delay) %>%
+  select(dep_delay,arr_delay)
+flights %>%
+  mutate(speed = distance/air_time)%>%
+  arrange(desc(speed))%>%
+  select(speed,distance,air_time)
+
+ ```
