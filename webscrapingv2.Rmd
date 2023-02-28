@@ -1,0 +1,58 @@
+---
+title: "webscraping"
+author: "Rumo Schilling"
+date: "2023-02-23"
+output: html_document
+---
+```{r}
+library(robotstxt)
+library(tidyverse)
+library(rvest)
+library(stringr)
+page <- read_html("https://www.imdb.com/chart/top")
+
+```
+```{r}
+titles <-page %>%
+  html_nodes(".titleColumn a")%>%
+  html_text()
+years <-page %>%
+  html_nodes(".secondaryInfo")%>%
+  html_text()%>%
+  str_remove("\\(")%>%
+  str_remove("\\)")%>%
+  as.numeric()
+ratings<-page %>% 
+  html_nodes("strong")%>% 
+  html_text()%>%
+  as.numeric()
+imdb <- tibble(
+  title = titles,
+  year = years,
+  rating = ratings
+)
+imdb 
+```
+```{r}
+page = read_html("http://facepage.putneyschool.org")
+names<- page %>%
+  html_nodes(".studentName")%>%
+  html_text()
+names
+```
+```{r}
+#| label: the top countries
+
+wikipage = read_html("https://en.wikipedia.org/wiki/World_population")
+wikipage %>%
+   html_nodes("table") %>% 
+  `[[`(3) %>%
+  html_table()
+wikipage %>%
+  html_nodes("a")%>%
+  '[['(2) %>%
+  html_text()
+wikipage %>%
+  html_nodes("a")%>%
+  html_text()
+```

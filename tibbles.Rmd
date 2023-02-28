@@ -1,0 +1,56 @@
+---
+title: "tibbles"
+author: "Rumo Schilling"
+date: "2023-02-28"
+output: html_document
+---
+Doing the tibble excersise from the book
+```{r}
+library(tidyverse)
+mtcars
+```
+```{r}
+mtcars %>% as_tibble()
+```
+1. It tells you at the top if its a tibble.
+
+2.
+```{r}
+df <- data.frame(abc = 1, xyz = "a")
+df$x
+df[, "xyz"]
+df[, c("abc", "xyz")]
+```
+```{r}
+df <- data.frame(abc = 1, xyz = "a") %>% as_tibble()
+df$x
+df[, "xyz"]
+df[, c("abc", "xyz")]
+```
+df$x somehow still outputs something that matches to a, while as a tibble it just tells you that the variable not exists(because it really does not)
+
+3.
+```{r}
+var <-"xyz"
+df$var
+#doesnt work
+```
+```{r}
+var <-"xyz"
+df[,var]
+#does work. That is kind of interesting, but also sad, because the dollar operator is way more elegant
+```
+4.
+```{r}
+`1` = runif(10,0,42)
+`2` = 1/runif(10,0,42) # this sadly does not even have a chance to fail by division through 0, because the 0 is exclusive. I have no chance of getting infinetly unlucky today https://stackoverflow.com/questions/48427049/does-runif-really-have-a-range-0-runifn-1-as-stated-in-the-documentat
+df <-tibble(`1`,`2`)
+df <-df %>% 
+  mutate(`3` = `2` /`1`)
+df
+
+df %>% 
+  rename("three" = `3`,"two" = `2`,"eins" =  `1` )
+
+
+```

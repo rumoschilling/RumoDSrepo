@@ -250,6 +250,7 @@ not_cancelled %>%
   group_by(year,month,day) %>%
   arrange(dep_time) %>%
   mutate(lagtime= mean(dep_time ))
+#| label:5.7.1.6
 not_cancelled %>%
   group_by(dest)%>%
   arrange(air_time) %>%
@@ -259,6 +260,20 @@ not_cancelled %>%
   select(dest,mean_airtime,air_time,perc)%>%
   arrange(perc)
 #es gibt nen par fluege die nicht richtig aussehen,aber es gibt keine offentsichtlichen errors
+not_cancelled %>%
+  group_by(dest)%>%
+  summarise(carriers = n_distinct(carrier))%>%
+  filter(carriers >1)
+# what does ranking mean?
 ```
+
+```{r}
+not_cancelled%>% 
+  group_by(tailnum)%>%
+  mutate(belated = first(arr_delay>60))%>%
+  arrange(tailnum)%>%
+  select(belated)
+```
+
 
 I dont really know what 1. means. How shoud it "change"
