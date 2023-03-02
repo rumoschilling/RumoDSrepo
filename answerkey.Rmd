@@ -1,0 +1,161 @@
+---
+title: "Data Wrangling (Chapter 5) Answer Key"
+author: "Mike Keim"
+date: January 12, 2023
+format: html
+editor: visual
+---
+
+```{r load packages, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(openintro)
+# install.packages("nycflights13")
+library(nycflights13)
+```
+
+# Chapter 5 Answer Key + Commentary
+
+## 5.1.1 - 5.1.3 Comments
+
+I recommend you make a note of two things here: 1) The definitions for types of variables, in particular "logicals" and "factors" and 2) the list of functions in section 5.1.3
+
+-   logicals are often called "Booleans" after George Boole, a key figure in the development of symbolic logic (and grandfather-in-law to Putney's founder Carmelita Hinton - how's that for a brush with mathematical and computing fame?!)
+
+-   factors are like those drop-down menus you encounter in a spreadsheet: Still going to be a categorical variable, but it has a limited set of options. For a Putney student, examples of factors would be things like "boarding/day" or "grade level" but examples of categorical variables that would not naturally fit as factors include "name" or "favorite sandwich."
+
+Notes on the `filter` function: In the examples given, three things to remember:
+
+-   You can display the results, store the results of the variable, or do both by putting the assignment operation inside parentheses.
+
+-   You can list sequentially any conditions you want to have met. Because this functions as a logical AND operator, the order does not matter. Results that are returned must satisfy all of the filter requirements.
+
+-   Note that by default `filter` removes all `NA` values, so if you want to keep those in, you need to explicitly include them. (examples are given in section 5.2.3)
+
+-   I think the visual Venn diagram in section 5.2.2 might be worth having close at hand for many of you.
+
+## 5.2.4 Answers
+
+All responses to 1 are just to write code, shown here:
+
+```{r 5.2.4.1 Exercises}
+#1 Had an arrival delay of two or more hours
+filter(flights,arr_delay>=120)
+
+#2 Flew to Houston (IAH or HOU)
+filter(flights,dest %in% c("HOU","IAH"))
+
+#3 Were operated by United, American, or Delta
+unique(flights$carrier) # to ge the acronyms/abbreviations correct
+filter(flights,carrier %in% c("UA","DL","AA"))
+
+#4 Departed in summer (July, August, and September)
+filter(flights,month %in% c(7,8,9))
+
+#5 Arrived more than two hours late, but didn’t leave late
+filter(flights,arr_delay>=120,dep_delay<=15) 
+# Google tells me that anything less than 15 minutes is still considered "on time"
+# https://www.bts.gov/explore-topics-and-geography/topics/airline-time-performance-and-causes-flight-delays#:~:text=from%20U.S.%20airports.-,How%20are%20flight%20delays%20calculated%3F,on%20departure%20from%20the%20gate.
+
+#6 Were delayed by at least an hour, but made up over 30 minutes in flight
+filter(flights,dep_delay>=60,arr_delay<dep_delay-30) 
+
+#7 Departed between midnight and 6am (inclusive)
+# NB: dep_time is formatted as 4-digit times NOT as minutes, just as HH:MM without the colon!
+filter(flights,dep_time>=0,dep_time<=0600)
+```
+
+2.  The between function allows you to simplify inequalities if you have something in a range, like question 1.7 above, which could be written as: `filter(flights,between(dep_time,0,360))` It's worth noting that "between" defaults to inclusive bounds.
+
+3.  There were `r nrow(filter(flights,is.na(dep_time)))` flights with no departure time. These rows also had no departure delay, arrival time, arrival delay, or airtime values, i.e. any of the values that need to be recorded AFTER take-off. These correspond to cancelled flights. We can find that number using `nrow(filter(flights,is.na(dep_time)))`. You may want to look at the RMarkdown file for this answer key to see how to include that number calculation directly (rather than having to run code and then enter the result in the RMarkdown file...)
+
+4.  These questions are a bit tricky actually, and I don't find them totally consistent. Let me take them in order:
+
+-   Why is `NA ^ 0` not missing? Well, this choice by the R developers implies a slightly overbroad statement that for any real number $x$, $x^0 = 1$, which is true provided $x \neq 0$ but the expression $0^0$ is mathematically undefined. However, the code `0^0` evaluates to 1 in R. For an interesting, and mathematically more correct alternative for how to handle this case, see [Wolfram Alpha](https://www.wolframalpha.com/) and enter `0^0` to see how they handle that case.
+
+-   Why is `NA | TRUE` not missing? The key here is to understand that in this context `NA` is standing in for an expression that would evaluate to a logical/Boolean variable, i.e. NA isn't *anything* in this context; it's either `TRUE` or `FALSE`. But, when you look at either of those cases and consider how it will evaluate when combined with `TRUE` in an OR statement (signified by `|`) then it's easy to see that both `FALSE | TRUE` and `TRUE | TRUE` will evaluate to `TRUE`.
+
+-   Why is `FALSE & NA` not missing? The same argument holds here as above, except that now it's in an AND statement, so both `FALSE & FALSE` and `FALSE & TRUE` will evaluate to `FALSE`.
+
+-   Can you figure out the general rule? (`NA * 0` is a tricky counterexample!) The general rule is something along the lines of "If the outcome does not depend on what the actual value of NA is, then the expression will evaluate to whatever that outcome is. The `NA*0` counterexample is actually a weird thing to bring up because in *this* case the developers chose to hew more closely to the strict mathematical line by allowing the possibilities that the `NA` value might be $\pm \infty$ which is, in my opinion, at odds with their smoothing over the $0^0$ case earlier on. But... this is rarely of any practical importance in actual data analysis.
+
+## 5.3 Comments
+
+A rather trivial point to make, but if you want a way to remember that `arrange()` will default to ordering in increasing order, you might note that sorting A-Z is more common as a default than Z-A.
+
+## 5.3.1 Answers
+
+1.  How could you use `arrange()` to sort all missing values to the start? (Hint: use is.na()).
+
+The issue here is that `arrange()` puts `NA` values at the end regarldess of whether you use the `desc()` option or not. Recall the advice back at the end of section 5.2.2:
+
+> Whenever you start using complicated, multipart expressions in `filter()`, consider making them explicit variables instead. That makes it much easier to check your work. You'll learn how to create new variables shortly.
+
+Here we are going to apply that advice by creating a logical variable by running `is.na(dep_time)` within the `arrange` function as follows:
+
+`arrange(flights, desc(is.na(dep_time)), dep_time)`
+
+Now, two things to note here: 1) `is.na(dep_time)` evaluates to a vector of `TRUE` or `FALSE` values, which can be thought of as 1 for `TRUE` and 0 for `FALSE` - hence *this* variable should be sorted in descending order if we want the `NAs` before the non-NA values. Also, 2) listing `dep_time` after `desc(is.na(dep_time))` means we will have flights that do have departure times arranged in increasing order, i.e. the `desc` only applies to the first variable used by `arrange`.
+
+2.  You can sort flights to find the most delayed flights by running `arrange(flights,desc(dep_delay))` and find the flights that left earliest (which I assume means "earliest in the day" not "earliest relative to their scheduled departure time) by running `arrange(flights,dep_time)`. If you wanted earliest in the *YEAR* then you would run `arrange(flights,day,dep_time)`
+
+3.  Sort flights to find the fastest (highest speed) flights. I assume this means fastest average speed over the duration of the flight.
+
+```{r 5.3.1.3}
+arrange(flights,desc(distance/(air_time)))
+```
+
+4.  Which flights travelled the farthest? Which travelled the shortest?
+
+```{r 5.3.1.4}
+farthest<-arrange(flights,desc(distance))
+shortest<-arrange(flights,distance)
+```
+The farthest flight was flight \# `r farthest$flight[1]` by `r farthest$carrier[1]` from `r farthest$origin[1]` to `r farthest$dest[1]`. The shortest flight was flight \# `r shortest$flight[1]` by `r shortest$carrier[1]` from `r shortest$origin[1]` to `r shortest$dest[1]`.
+
+Notice that it would be nice to have a little script that could convert "HA" to "Hawaiian Airlines" and "US" to "US Airways". A litle digging uncovers the "airlines" tibble in the nycflights library, which we can leverage this way:
+
+The farthest flight was flight \# `r farthest$flight[1]` by `r airlines[airlines$carrier==farthest$carrier[1],2]` from `r farthest$origin[1]` to `r farthest$dest[1]`. But something about that "Inc." at the end remains unsatisfying.
+
+## 5.4.1 Answers
+
+1.  Brainstorm as many ways as possible to select dep_time, dep_delay, arr_time, and arr_delay from flights. The most straightforward is just to list the variable names like this: `select(flights,"dep_time","dep_delay","arr_time","arr_delay")` and if it's only four variables, that's probably what I'd recommend. 
+
+Other options like: `select(flights,starts_with("dep"),starts_with("arr"))` also work in this case, but some others like 
+* `select(flights,ends_with("time"),ends_with("delay"))` or
+* `select(flights,contains("dep"),contains("arr"))` or
+* `select(flights,contains("time"),contains("delay"))` will end up grabbing unintended variables like `scheduled_departure_time`.
+
+2.  What happens if you include the name of a variable multiple times in a select() call? 
+
+The line `select(flights,"dep_time","dep_time")` just returns the same output as `select(flights,"dep_time")`. 
+
+[The Answer Key](https://jrnold.github.io/r4ds-exercise-solutions/transform.html#select) presents some utility for this fact, by allowing you to use `select` with any particular variable you want to move to the first column of the list, along with the `everything()`, e.g. by writing `select(flights,"dep_time",everything())` to move `dep_time` to the first column
+
+  3.  What does the `any_of()` function do? Why might it be helpful in conjunction with this vector? `vars <- c("year", "month", "day", "dep_delay", "arr_delay")`
+
+The `anyof()` function allows you to feed a list of variable names to the `select()` function, but I'm unclear how this is of great utility. The help file (`?any_of()`) and [this page](https://tidyselect.r-lib.org/reference/language.html) make some arguments for how this can be useful if you're missing some values and don't want to exclude them. I would not get too hung up on this particular question for now.
+```{r 5.4.1.3}
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+select(flights,any_of(vars)) 
+```
+
+4.  Does the result of running the following code surprise you? How do the select helpers deal with case by default? How can you change that default?
+`select(flights, contains("TIME"))`  
+
+I guess no, not really. When things are case-sensitive, or not, does not have a coherent logic in my mind outside of password protection contexts. So here, the strings "time", "TIME" and, oh, perhaps "tImE" are all treated the same. If you want to induce/force case sensitivity, you can add this option:
+`select(flights, contains("TIME",ignore.case=FALSE))`. Notice that the `ignore.case` part goes INSIDE the `contains` helper function.
+
+But how would you have known this? This is where you want to get comfortable with your internet searching skills. I started with "r select case sensitive" and the first hit was this [stackoverflow page](https://stackoverflow.com/questions/54634124/dplyrend-with-and-case-sensitivity) which had the answer I needed, and also this link to a helpful [reference page](https://www.rdocumentation.org/packages/tidyselect/versions/0.2.5/topics/select_helpers) specifically on the helper functions.
+
+
+## 5.5 Comments on the `mutate()` function
+
+
+## 5.5.2 Answers
+
+
+## 5.6.7 Answers
+
+
+## 5.7.1 Answers          
+                                                                                                                                                                                                                   

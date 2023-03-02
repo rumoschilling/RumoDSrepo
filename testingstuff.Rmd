@@ -1,0 +1,13 @@
+---
+title: "testingstuff"
+author: "Rumo Schilling"
+date: "2023-02-16"
+output: html_document
+---
+
+```{r}
+df<-data.frame("A"=c('a', 'b', 'c', 'd','b'), "B"=c(3, 5, 8, 2,9))
+val = df$B[match("b",df$A)]
+val
+
+```

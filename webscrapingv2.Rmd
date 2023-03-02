@@ -56,3 +56,44 @@ wikipage %>%
   html_nodes("a")%>%
   html_text()
 ```
+```{r}
+testlink = read_html("https://www.openintro.org/data/index.php?data=absenteeism")
+testlink %>%
+  html_nodes("p:nth-child(7)")%>%
+  html_text() %>%
+  str_split_i("with ",2)%>%
+  str_split_i(" observations",1)
+  # testlink %>%
+    # html_nodes("p") %>%
+    # '[['(4) %>%
+    # html_text() %>%
+    # str_replace_all(pattern= "\n",replacement = " ")
+```
+```{r}
+openintro <-read_html("https://www.openintro.org/data/")
+links  <-openintro %>%
+  html_nodes(".h5 a") %>%
+  html_attr("href")
+titles <-openintro %>%
+  html_nodes(".h5 a") %>%
+  html_text()
+descriptions <- c()
+for (x in links) 
+{
+  page <- read_html(paste("https://www.openintro.org/data/",x,sep = ""))
+  # observation <-html_nodes("p:nth-child(7)")%>%
+  # html_text() %>%
+  # str_split_i("with ",2)%>%
+  # str_split_i(" observations",1)
+  
+  description <- page %>%
+    html_nodes("p:nth-child(3)") %>%
+    html_text() %>%
+    str_replace_all(pattern= "\n",replacement = " ")
+  descriptions %>%append(description)
+}
+descriptions
+
+# it sadly closed my connection
+
+```
